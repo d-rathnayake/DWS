@@ -61,10 +61,10 @@
       <text x="642" y="116" fill="#58A6FF" opacity="0">$ dws
         <animate attributeName="opacity" from="0" to="1" begin="0.3s" dur="0.4s" fill="freeze"/>
       </text>
-      <text x="642" y="146" fill="#9ED2FF" opacity="0">  ◈ Banner   shana
+      <text x="642" y="146" fill="#9ED2FF" opacity="0">  ◈ Banner   DWS
         <animate attributeName="opacity" from="0" to="1" begin="1.0s" dur="0.4s" fill="freeze"/>
       </text>
-      <text x="642" y="170" fill="#84FFB0" opacity="0">  ◈ Device   Sony S0-02K
+      <text x="642" y="170" fill="#84FFB0" opacity="0">  ◈ Device   Android · Termux
         <animate attributeName="opacity" from="0" to="1" begin="1.5s" dur="0.4s" fill="freeze"/>
       </text>
       <text x="642" y="194" fill="#FFD479" opacity="0">  ◈ Uptime   2h 14m

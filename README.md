@@ -105,7 +105,7 @@ The installer asks two quick questions (banner name, and whether to delete the i
 ### Quick examples
 
 ```bash
-dws name Kavi-7            # new banner name, shown in new shells
+dws name My-Brand          # new banner name, shown in new shells
 ls -la                     # icon listing with hidden files and details
 dws todo add ship it
 dws todo done 1

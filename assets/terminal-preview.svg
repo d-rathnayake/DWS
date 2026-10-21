@@ -26,7 +26,7 @@
 
   <g font-family="Consolas, Menlo, Courier New, monospace" font-size="19">
     <text x="60" y="118" fill="#8FA3CC">┌─[</text>
-    <text x="104" y="118" fill="#FF6EC7" font-weight="700">shana</text>
+    <text x="104" y="118" fill="#FF6EC7" font-weight="700">DWS</text>
     <text x="158" y="118" fill="#8FA3CC">]─[</text>
     <text x="192" y="118" fill="#39C5FF">~/DWS</text>
     <text x="250" y="118" fill="#8FA3CC">]</text>
@@ -59,9 +59,9 @@
   <rect x="60" y="420" width="880" height="2" fill="url(#bar)" opacity="0.5"/>
   <g font-family="Consolas, Menlo, Courier New, monospace" font-size="17">
     <text x="70" y="456" fill="#FF6EC7">◈ Banner</text>
-    <text x="190" y="456" fill="#E6EDFF">shana</text>
+    <text x="190" y="456" fill="#E6EDFF">DWS</text>
     <text x="330" y="456" fill="#84FFB0">◈ Device</text>
-    <text x="450" y="456" fill="#E6EDFF">Sony S0-02K</text>
+    <text x="450" y="456" fill="#E6EDFF">Android · Termux</text>
     <text x="680" y="456" fill="#FFD479">◈ Uptime</text>
     <text x="790" y="456" fill="#E6EDFF">2h 14m</text>
     <text x="70" y="490" fill="#7FD8FF">◈ Store</text>
