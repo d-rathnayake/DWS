@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" role="img" aria-label="DWS terminal preview: icon listing">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070B18"/>
+      <stop offset="100%" stop-color="#0C1226"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#58A6FF"/>
+      <stop offset="100%" stop-color="#FF6EC7"/>
+    </linearGradient>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1000" height="560" fill="#05070F"/>
+  <rect x="30" y="30" width="940" height="500" rx="18" fill="url(#bg)" stroke="#2B3A66" stroke-width="1.5"/>
+  <rect x="30" y="30" width="940" height="42" rx="18" fill="#101A36"/>
+  <rect x="30" y="58" width="940" height="14" fill="#101A36"/>
+  <circle cx="62" cy="51" r="7" fill="#FF5F56"/>
+  <circle cx="86" cy="51" r="7" fill="#FFBD2E"/>
+  <circle cx="110" cy="51" r="7" fill="#27C93F"/>
+  <text x="500" y="56" text-anchor="middle" font-family="Consolas, Menlo, monospace" font-size="15" fill="#8FA3CC">termux ~ DWS</text>
+  <rect x="30" y="72" width="940" height="2" fill="url(#bar)" opacity="0.8"/>
+
+  <g font-family="Consolas, Menlo, Courier New, monospace" font-size="19">
+    <text x="60" y="118" fill="#8FA3CC">┌─[</text>
+    <text x="104" y="118" fill="#FF6EC7" font-weight="700">shana</text>
+    <text x="158" y="118" fill="#8FA3CC">]─[</text>
+    <text x="192" y="118" fill="#39C5FF">~/DWS</text>
+    <text x="250" y="118" fill="#8FA3CC">]</text>
+    <text x="60" y="144" fill="#FFBD2E">└─❯❯❯</text>
+    <text x="118" y="144" fill="#E6EDFF">ls -la</text>
+  </g>
+
+  <!-- icon listing (two columns) -->
+  <g font-family="Consolas, Menlo, Courier New, monospace" font-size="18">
+    <text x="70" y="186" fill="#39C5FF" font-weight="700">📁 docs</text>
+    <text x="70" y="214" fill="#39C5FF" font-weight="700">📁 src</text>
+    <text x="70" y="242" fill="#CBD5E1">📝 README.md</text>
+    <text x="70" y="270" fill="#FFD479">🔧 config.json</text>
+    <text x="70" y="298" fill="#FF9F68">🌐 index.html</text>
+    <text x="70" y="326" fill="#A78BFA">🐍 app.py</text>
+    <text x="70" y="354" fill="#5EEAD4">🐚 install.sh</text>
+
+    <text x="500" y="186" fill="#FFB4E0">🎨 banner.svg</text>
+    <text x="500" y="214" fill="#FF8A8A">📦 backup.zip</text>
+    <text x="500" y="242" fill="#FF8A8A">📕 manual.pdf</text>
+    <text x="500" y="270" fill="#CFC6FF">🎵 song.mp3</text>
+    <text x="500" y="298" fill="#CFC6FF">🎬 clip.mp4</text>
+    <text x="500" y="326" fill="#84FFB0">⚡ run.sh</text>
+    <text x="500" y="354" fill="#7FD8FF">🔗 current</text>
+  </g>
+
+  <text x="70" y="398" font-family="Consolas, Menlo, monospace" font-size="16" fill="#8FA3CC">  14 items · 3 folders · 11 files</text>
+
+  <!-- dashboard strip -->
+  <rect x="60" y="420" width="880" height="2" fill="url(#bar)" opacity="0.5"/>
+  <g font-family="Consolas, Menlo, Courier New, monospace" font-size="17">
+    <text x="70" y="456" fill="#FF6EC7">◈ Banner</text>
+    <text x="190" y="456" fill="#E6EDFF">shana</text>
+    <text x="330" y="456" fill="#84FFB0">◈ Device</text>
+    <text x="450" y="456" fill="#E6EDFF">Sony S0-02K</text>
+    <text x="680" y="456" fill="#FFD479">◈ Uptime</text>
+    <text x="790" y="456" fill="#E6EDFF">2h 14m</text>
+    <text x="70" y="490" fill="#7FD8FF">◈ Store</text>
+    <text x="190" y="490" fill="#E6EDFF">13G/21G (63%)</text>
+    <text x="450" y="490" fill="#FF9F68">◈ Time</text>
+    <text x="530" y="490" fill="#E6EDFF">02:36 PM</text>
+  </g>
+</svg>

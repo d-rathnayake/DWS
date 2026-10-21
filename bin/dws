@@ -1,0 +1,809 @@
+#!/usr/bin/env bash
+# ==========================================================
+#  DWS PREMIUM V1 — Termux / Linux banner toolkit
+#  Developer : d-rathnayake
+#  Offline by design. Only 'weather' and 'speedtest' use the
+#  network, and only when you run them yourself.
+# ==========================================================
+
+DWS_VERSION="1"
+DWS_HOME="${DWS_HOME:-$HOME/.dws}"
+NAME_FILE="$DWS_HOME/name"
+NOTE_FILE="$DWS_HOME/notes.txt"
+TODO_FILE="$DWS_HOME/todo.txt"
+DEV_NAME="d-rathnayake"
+
+ESC=$'\033'
+RESET="${ESC}[0m"
+BOLD="${ESC}[1m"
+# Logo gradient (same as the original banner)
+M1="${ESC}[1;38;5;39m"
+M2="${ESC}[1;38;5;45m"
+M3="${ESC}[1;38;5;51m"
+# Accents
+VIO="${ESC}[38;5;141m"
+PINK="${ESC}[1;38;5;213m"
+MINT="${ESC}[1;38;5;84m"
+GOLD="${ESC}[1;38;5;220m"
+SKY="${ESC}[1;38;5;117m"
+ORANGE="${ESC}[1;38;5;208m"
+GREY="${ESC}[38;5;245m"
+WHITE="${ESC}[1;38;5;255m"
+RED="${ESC}[1;38;5;203m"
+
+ok()   { printf ' %s✔%s %s\n' "$MINT" "$RESET" "$*"; }
+info() { printf ' %s➜%s %s\n' "$SKY" "$RESET" "$*"; }
+warn() { printf ' %s⚠%s %s\n' "$GOLD" "$RESET" "$*"; }
+err()  { printf ' %s✖%s %s\n' "$RED" "$RESET" "$*" >&2; }
+
+# ---------- system helpers ----------------------------------
+valid_name() { [[ "$1" =~ ^[A-Za-z0-9-]{1,10}$ ]]; }
+
+current_name() {
+  local n=""
+  if [ -r "$NAME_FILE" ]; then n="$(head -n 1 "$NAME_FILE" 2>/dev/null)"; fi
+  if ! valid_name "$n"; then n="DWS"; fi
+  printf '%s' "$n"
+}
+
+device_info() {
+  if command -v getprop >/dev/null 2>&1; then
+    printf '%s %s' "$(getprop ro.product.manufacturer 2>/dev/null)" \
+      "$(getprop ro.product.model 2>/dev/null)" | sed 's/^ *//;s/ *$//'
+  else
+    uname -sm
+  fi
+}
+
+uptime_info() {
+  local s
+  s=$(cut -d. -f1 /proc/uptime 2>/dev/null)
+  case "$s" in ''|*[!0-9]*) printf 'n/a'; return 0 ;; esac
+  printf '%dh %dm' $(( s / 3600 )) $(( (s % 3600) / 60 ))
+}
+
+disk_info() {
+  df -h "$HOME" 2>/dev/null | awk 'NR==2 {printf "%s/%s (%s)", $3, $2, $5}'
+}
+
+free_mb() {
+  df -Pm "$HOME" 2>/dev/null | awk 'NR==2 {print $4}'
+}
+
+term_width() {
+  local w
+  w=$(tput cols 2>/dev/null)
+  case "$w" in ''|*[!0-9]*) w=60 ;; esac
+  if [ "$w" -gt 80 ]; then w=80; fi
+  if [ "$w" -lt 40 ]; then w=40; fi
+  printf '%s' "$w"
+}
+
+rep() {
+  local s="$1" n="$2" i
+  for ((i = 0; i < n; i++)); do printf '%s' "$s"; done
+}
+
+# ---------- 3x5 block font (kept from the original banner) ----
+glyph_rows() {
+  GLYPH_ROWS=()
+  case "$1" in
+    A) GLYPH_ROWS=(' ▄▀▄ ' '▀▀▀▀▀' '█   █') ;;
+    B) GLYPH_ROWS=('▀▀▀▄ ' '▀▀▀▄ ' '▀▀▀▀ ') ;;
+    C) GLYPH_ROWS=(' ▄▀▀▀' '█    ' ' ▀▀▀▀') ;;
+    D) GLYPH_ROWS=('▀▀▀▄ ' '█   █' '▀▀▀▀ ') ;;
+    E) GLYPH_ROWS=('▀▀▀▀▀' '▀▀▀  ' '▀▀▀▀▀') ;;
+    F) GLYPH_ROWS=('▀▀▀▀▀' '▀▀▀  ' '█    ') ;;
+    G) GLYPH_ROWS=(' ▄▀▀▀' '█ ▀▀█' ' ▀▀▀▀') ;;
+    H) GLYPH_ROWS=('█   █' '▀▀▀▀▀' '█   █') ;;
+    I) GLYPH_ROWS=('▀▀▀▀▀' '  █  ' '▀▀▀▀▀') ;;
+    J) GLYPH_ROWS=('  ▄▀▀' '   █ ' '▀▀▀  ') ;;
+    K) GLYPH_ROWS=('█  ▄▀' '▀▀▀  ' '█  ▀▄') ;;
+    L) GLYPH_ROWS=('█    ' '█    ' '▀▀▀▀▀') ;;
+    M) GLYPH_ROWS=('█▄ ▄█' '█ ▀ █' '█   █') ;;
+    N) GLYPH_ROWS=('█▄  █' '█ ▀ █' '█   █') ;;
+    O) GLYPH_ROWS=(' ▄▀▄ ' '█   █' ' ▀▀▀ ') ;;
+    P) GLYPH_ROWS=('▀▀▀▄ ' '▀▀▀▀ ' '█    ') ;;
+    Q) GLYPH_ROWS=(' ▄▀▄ ' '█ ▀ █' ' ▀▀▀█') ;;
+    R) GLYPH_ROWS=('▀▀▀▄ ' '▀▀▀▀ ' '█  ▀▄') ;;
+    S) GLYPH_ROWS=(' ▄▀▀▀' ' ▀▀▄ ' '▀▀▀▀ ') ;;
+    T) GLYPH_ROWS=('▀▀▀▀▀' '  █  ' '  █  ') ;;
+    U) GLYPH_ROWS=('█   █' '█   █' ' ▀▀▀ ') ;;
+    V) GLYPH_ROWS=('█   █' ' ▀ ▀ ' '  ▀  ') ;;
+    W) GLYPH_ROWS=('█   █' '█ ▀ █' ' ▀ ▀ ') ;;
+    X) GLYPH_ROWS=('█   █' ' ▀▀▀ ' '█   █') ;;
+    Y) GLYPH_ROWS=('█   █' ' ▀▀▀ ' '  █  ') ;;
+    Z) GLYPH_ROWS=('▀▀▀▀▀' ' ▄▀  ' '▀▀▀▀▀') ;;
+    0) GLYPH_ROWS=(' ▄▀▄ ' '█ █ █' ' ▀▀▀ ') ;;
+    1) GLYPH_ROWS=('  █  ' ' ▄█  ' '▀▀▀▀▀') ;;
+    2) GLYPH_ROWS=('▀▀▀▄ ' ' ▄▀  ' '▀▀▀▀▀') ;;
+    3) GLYPH_ROWS=('▀▀▀▄ ' ' ▀▀▄ ' '▀▀▀▀ ') ;;
+    4) GLYPH_ROWS=('█  █ ' '▀▀▀▀▀' '   █ ') ;;
+    5) GLYPH_ROWS=('▀▀▀▀▀' '▀▀▀▄ ' '▀▀▀▀ ') ;;
+    6) GLYPH_ROWS=(' ▄▀▀▀' '▀▀▀▄ ' '▀▀▀▀ ') ;;
+    7) GLYPH_ROWS=('▀▀▀▀▀' '  ▄▀ ' '  █  ') ;;
+    8) GLYPH_ROWS=(' ▄▀▄ ' ' ▀▀▄ ' '▀▀▀▀ ') ;;
+    9) GLYPH_ROWS=(' ▄▀▄ ' ' ▀▀▀▀' '▀▀▀  ') ;;
+    :) GLYPH_ROWS=('  ▄  ' '     ' '  ▀  ') ;;
+    -) GLYPH_ROWS=('     ' ' ▀▀▀ ' '     ') ;;
+    *) GLYPH_ROWS=('     ' '     ' '     ') ;;
+  esac
+}
+
+# build_logo <text> [max-chars]  → fills LOGO_LINES and LOGO_VW
+build_logo() {
+  local up i ch n
+  up=$(printf '%s' "$1" | tr 'a-z' 'A-Z')
+  up="${up:0:${2:-7}}"
+  n=${#up}
+  LOGO_LINES=("" "" "")
+  for ((i = 0; i < n; i++)); do
+    ch="${up:i:1}"
+    glyph_rows "$ch"
+    if [ "$i" -eq 0 ]; then
+      LOGO_LINES=("${GLYPH_ROWS[0]}" "${GLYPH_ROWS[1]}" "${GLYPH_ROWS[2]}")
+    else
+      LOGO_LINES[0]+="  ${GLYPH_ROWS[0]}"
+      LOGO_LINES[1]+="  ${GLYPH_ROWS[1]}"
+      LOGO_LINES[2]+="  ${GLYPH_ROWS[2]}"
+    fi
+  done
+  if [ "$n" -eq 0 ]; then LOGO_VW=0; else LOGO_VW=$(( n * 5 + (n - 1) * 2 )); fi
+}
+
+# ---------- banner -------------------------------------------
+INNER=40
+
+# box_line <visible-width> <coloured content>
+box_line() {
+  local vis="$1" content="$2" pad
+  pad=$(( INNER - vis ))
+  if [ "$pad" -lt 0 ]; then pad=0; fi
+  printf '%s│%s%s%*s%s│%s\n' "$VIO" "$RESET" "$content" "$pad" "" "$VIO" "$RESET"
+}
+
+info_row() {
+  # info_row <colour> <label> <value>
+  printf '  %s◈%s %s%-8s%s %s\n' "$1" "$RESET" "$WHITE" "$2" "$RESET" "$3"
+}
+
+draw_home_banner() {
+  local name width date tm dev ver plain pad l r line
+  name="$(current_name)"
+  width=$(term_width)
+  INNER=$(( width - 2 ))
+  date=$(date +"%Y-%b-%d")
+  tm=$(date +"%I:%M %p")
+  build_logo "$name" 7
+  local -a colors=("$M1" "$M2" "$M3")
+
+  printf '\033[H\033[2J\033[3J'
+
+  printf '%s╭%s╮%s\n' "$VIO" "$(rep '─' "$INNER")" "$RESET"
+
+  plain="DWS PREMIUM V${DWS_VERSION}  |  ${date}"
+  box_line $(( 2 + ${#plain} )) "  ${BOLD}${PINK}DWS PREMIUM${RESET} ${MINT}V${DWS_VERSION}${RESET}  ${VIO}|${RESET}  ${GREY}${date}${RESET}"
+
+  printf '%s│%s%*s%s│%s\n' "$VIO" "$RESET" "$INNER" "" "$VIO" "$RESET"
+
+  l=$(( (INNER - LOGO_VW) / 2 ))
+  if [ "$l" -lt 0 ]; then l=0; fi
+  r=$(( INNER - l - LOGO_VW ))
+  if [ "$r" -lt 0 ]; then r=0; fi
+  local i
+  for i in 0 1 2; do
+    line="${LOGO_LINES[$i]}"
+    box_line "$INNER" "$(printf '%*s%s%s%s%*s' "$l" "" "${colors[$i]}" "$line" "$RESET" "$r" "")"
+  done
+
+  printf '%s│%s%*s%s│%s\n' "$VIO" "$RESET" "$INNER" "" "$VIO" "$RESET"
+
+  dev="dev - ${DEV_NAME}"; ver="V${DWS_VERSION}"
+  pad=$(( INNER - 2 - ${#dev} - ${#ver} - 2 ))
+  if [ "$pad" -lt 0 ]; then pad=0; fi
+  printf '%s│%s  %sdev%s %s-%s %s%s%s%*s%s%s%s  %s│%s\n' \
+    "$VIO" "$RESET" "$PINK" "$RESET" "$VIO" "$RESET" "$SKY" "$DEV_NAME" "$RESET" "$pad" "" "$GOLD" "$ver" "$RESET" "$VIO" "$RESET"
+
+  printf '%s╰%s╯%s\n\n' "$VIO" "$(rep '─' "$INNER")" "$RESET"
+
+  info_row "$PINK"   "Banner"  "${BOLD}${name}${RESET}"
+  info_row "$MINT"   "Device"  "$(device_info)"
+  info_row "$GOLD"   "Uptime"  "$(uptime_info)"
+  info_row "$SKY"    "Store"   "$(disk_info)"
+  info_row "$ORANGE" "Time"    "$tm"
+  printf '\n  %s➜%s Type %sdws help%s for commands\n\n' "$SKY" "$RESET" "$MINT" "$RESET"
+}
+
+# ---------- icon ls ----------------------------------------
+# classify <path> <name>  → sets ICON and CCODE (SGR parameters)
+classify() {
+  local path="$1" name="$2" ext
+  ICON="📄"; CCODE="38;5;250"
+  if [ -L "$path" ]; then ICON="🔗"; CCODE="1;38;5;213"; return 0; fi
+  if [ -d "$path" ]; then ICON="📁"; CCODE="1;38;5;39"; return 0; fi
+  if [ -x "$path" ]; then ICON="⚡"; CCODE="1;38;5;84"; fi
+  ext=""
+  case "$name" in
+    *.*) ext="${name##*.}" ;;
+  esac
+  ext=$(printf '%s' "$ext" | tr 'A-Z' 'a-z')
+  case "$ext" in
+    sh|bash|zsh|fish)                   ICON="🐚"; CCODE="1;38;5;84" ;;
+    py)                                 ICON="🐍"; CCODE="38;5;220" ;;
+    js|mjs|cjs|ts|jsx|tsx)              ICON="📜"; CCODE="38;5;221" ;;
+    c|h|cpp|hpp|go|rs|java|kt|php|rb|swift|dart|lua)
+                                        ICON="💻"; CCODE="38;5;51" ;;
+    html|htm|css|scss)                  ICON="🌐"; CCODE="38;5;208" ;;
+    json|yml|yaml|toml|xml|conf|ini|env|cfg|properties|lock)
+                                        ICON="🔧"; CCODE="38;5;117" ;;
+    md|txt|rst|log|csv)                 ICON="📝"; CCODE="38;5;255" ;;
+    pdf|doc|docx|odt|ppt|pptx|xls|xlsx|ods)
+                                        ICON="📕"; CCODE="38;5;203" ;;
+    png|jpg|jpeg|gif|webp|bmp|svg|heic|ico)
+                                        ICON="🎨"; CCODE="38;5;213" ;;
+    mp4|mkv|webm|mov|avi|3gp)           ICON="🎬"; CCODE="38;5;141" ;;
+    mp3|wav|ogg|flac|m4a|aac|opus)      ICON="🎵"; CCODE="38;5;177" ;;
+    zip|tar|gz|tgz|bz2|xz|7z|rar|zst)  ICON="📦"; CCODE="38;5;209" ;;
+    apk|deb)                            ICON="📱"; CCODE="38;5;84" ;;
+    db|sqlite|sqlite3)                  ICON="💾"; CCODE="38;5;141" ;;
+  esac
+  return 0
+}
+
+human_size() {
+  awk -v b="$1" 'BEGIN {
+    split("B K M G T", u, " "); i = 1
+    while (b >= 1024 && i < 5) { b /= 1024; i++ }
+    if (i == 1) printf "%dB", b; else printf "%.1f%s", b, u[i]
+  }'
+}
+
+plural() { # plural <count> <singular> <plural>
+  if [ "$1" -eq 1 ]; then printf '%s %s' "$1" "$2"; else printf '%s %s' "$1" "$3"; fi
+}
+
+# render_items <base> <long 0|1> <colour 0|1> <names...>
+render_items() {
+  local base="$1" long="$2" color="$3"; shift 3
+  local -a dirs=() others=() order=()
+  local n p dcount=0 fcount=0 total=0
+  for n in "$@"; do
+    p="$n"
+    if [ -n "$base" ]; then p="$base/$n"; fi
+    if [ -d "$p" ] && [ ! -L "$p" ]; then dirs+=("$n"); else others+=("$n"); fi
+  done
+  order=("${dirs[@]}" "${others[@]}")
+  total=${#order[@]}
+  if [ "$total" -eq 0 ]; then
+    printf ' %s(empty)%s\n' "$GREY" "$RESET"
+    return 0
+  fi
+
+  if [ "$long" -eq 1 ]; then
+    for n in "${order[@]}"; do
+      p="$n"; if [ -n "$base" ]; then p="$base/$n"; fi
+      classify "$p" "$n"
+      local size="-" when=""
+      if [ ! -d "$p" ]; then
+        size=$(human_size "$(wc -c < "$p" 2>/dev/null || echo 0)")
+      fi
+      when=$(date -r "$p" '+%b %d %H:%M' 2>/dev/null)
+      if [ "$color" -eq 1 ]; then
+        printf ' %s %s%8s%s  %s%s%s  %s%s%s\n' "$ICON" "${ESC}[${CCODE}m" "$size" "$RESET" \
+          "$GREY" "$when" "$RESET" "${ESC}[${CCODE}m" "$n" "$RESET"
+      else
+        printf ' %s %8s  %s  %s\n' "$ICON" "$size" "$when" "$n"
+      fi
+    done
+  else
+    local maxv=0 vis
+    for n in "${order[@]}"; do
+      vis=$(( 3 + ${#n} ))
+      if [ "$vis" -gt "$maxv" ]; then maxv=$vis; fi
+    done
+    local cell=$(( maxv + 3 ))
+    local width cols idx=0
+    width=$(tput cols 2>/dev/null); case "$width" in ''|*[!0-9]*) width=80 ;; esac
+    cols=$(( width / cell )); if [ "$cols" -lt 1 ]; then cols=1; fi
+    for n in "${order[@]}"; do
+      p="$n"; if [ -n "$base" ]; then p="$base/$n"; fi
+      classify "$p" "$n"
+      vis=$(( 3 + ${#n} ))
+      if [ "$color" -eq 1 ]; then
+        printf '%s %s%s%s' "$ICON" "${ESC}[${CCODE}m" "$n" "$RESET"
+      else
+        printf '%s %s' "$ICON" "$n"
+      fi
+      idx=$(( idx + 1 ))
+      if [ $(( idx % cols )) -eq 0 ] || [ "$idx" -eq "$total" ]; then
+        printf '\n'
+      else
+        printf '%*s' $(( cell - vis )) ''
+      fi
+    done
+  fi
+  for n in "${order[@]}"; do
+    p="$n"; if [ -n "$base" ]; then p="$base/$n"; fi
+    if [ -d "$p" ] && [ ! -L "$p" ]; then dcount=$(( dcount + 1 )); else fcount=$(( fcount + 1 )); fi
+  done
+  local items_w folders_w files_w
+  items_w=$(plural "$total" item items)
+  folders_w=$(plural "$dcount" folder folders)
+  files_w=$(plural "$fcount" file files)
+  if [ "$color" -eq 1 ]; then
+    printf ' %s%s · %s · %s%s\n' "$GREY" "$items_w" "$folders_w" "$files_w" "$RESET"
+  else
+    printf ' %s · %s · %s\n' "$items_w" "$folders_w" "$files_w"
+  fi
+}
+
+dws_ls() {
+  local all=0 long=0 color=0 t f
+  local -a targets=() names=() files=()
+  if [ -t 1 ]; then color=1; fi
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -a|-A)             all=1 ;;
+      -l)                long=1 ;;
+      -al|-la|-lA|-Al)   all=1; long=1 ;;
+      --plain|--no-color) color=0 ;;
+      --color|--color=always) color=1 ;;
+      -h|--help)
+        info "dws ls [-a] [-l] [path...]   (-a hidden files, -l details, --plain no colour)"
+        return 0 ;;
+      --) ;;
+      -*) ;;
+      *)  targets+=("$1") ;;
+    esac
+    shift
+  done
+  if [ ${#targets[@]} -eq 0 ]; then targets=(.); fi
+
+  local was_dotglob=0 rc=0
+  shopt -q dotglob && was_dotglob=1
+  for t in "${targets[@]}"; do
+    if [ ! -e "$t" ] && [ ! -L "$t" ]; then
+      err "ls: cannot access '$t': no such file or directory"
+      rc=1
+      continue
+    fi
+    if [ -d "$t" ] && [ ! -L "$t" ]; then
+      if [ "${#targets[@]}" -gt 1 ]; then printf '\n %s%s:%s\n' "$BOLD" "$t" "$RESET"; fi
+      names=()
+      shopt -s nullglob
+      if [ "$all" -eq 1 ]; then shopt -s dotglob; else shopt -u dotglob; fi
+      for f in "$t"/*; do
+        f="${f##*/}"
+        if [ "$f" = "." ] || [ "$f" = ".." ]; then continue; fi
+        names+=("$f")
+      done
+      shopt -u nullglob
+      if [ "$was_dotglob" -eq 1 ]; then shopt -s dotglob; else shopt -u dotglob; fi
+      render_items "$t" "$long" "$color" "${names[@]}"
+    else
+      files+=("$t")
+    fi
+  done
+  if [ ${#files[@]} -gt 0 ]; then
+    render_items "" "$long" "$color" "${files[@]}"
+  fi
+  return "$rc"
+}
+
+# ---------- info / doctor -----------------------------------
+info_cmd() {
+  draw_home_banner
+  section_title "system"
+  info_row "$PINK"   "OS"      "$(uname -sr)"
+  info_row "$PINK"   "Arch"    "$(uname -m)"
+  info_row "$MINT"   "Device"  "$(device_info)"
+  info_row "$GOLD"   "Uptime"  "$(uptime_info)"
+  info_row "$SKY"    "Store"   "$(disk_info)"
+  section_title "tools"
+  info_row "$ORANGE" "bash"    "${BASH_VERSION%%(*}"
+  info_row "$ORANGE" "zsh"     "$(tool_version zsh --version 2)"
+  info_row "$ORANGE" "git"     "$(tool_version git --version 3)"
+  info_row "$ORANGE" "curl"    "$(tool_version curl --version 2)"
+  section_title "dws"
+  info_row "$PINK"   "Version" "V${DWS_VERSION}"
+  info_row "$PINK"   "Home"    "$DWS_HOME"
+  printf '\n'
+}
+
+section_title() {
+  printf '\n %s▌%s %s%s%s\n' "$PINK" "$RESET" "$BOLD" "$1" "$RESET"
+}
+
+tool_version() {
+  local cmd="$1" field="${*: -1}" args
+  if ! command -v "$cmd" >/dev/null 2>&1; then printf 'not installed'; return 0; fi
+  args=("${@:2:$(( $# - 2 ))}")
+  "$cmd" "${args[@]}" 2>/dev/null | awk -v f="$field" 'NR==1 {print $f}'
+}
+
+chk() {
+  local label="$1"; shift
+  if "$@" >/dev/null 2>&1; then
+    printf '   %s✔%s %s\n' "$MINT" "$RESET" "$label"
+    return 0
+  fi
+  printf '   %s✖%s %s\n' "$RED" "$RESET" "$label"
+  return 1
+}
+
+doctor_cmd() {
+  local fails=0
+  section_title "doctor"
+  chk "zsh installed"              command -v zsh   || fails=$((fails + 1))
+  chk "git installed"              command -v git   || fails=$((fails + 1))
+  chk "curl installed"             command -v curl  || fails=$((fails + 1))
+  chk "dws command in place"       test -x "$DWS_HOME/bin/dws" || fails=$((fails + 1))
+  chk "zsh hook in .zshrc"         grep -qF "# >>> DWS >>>" "$HOME/.zshrc" || fails=$((fails + 1))
+  chk "bash hook in .bashrc"       grep -qF "# >>> DWS >>>" "$HOME/.bashrc" || fails=$((fails + 1))
+  chk "banner name valid"          valid_name "$(current_name)" || fails=$((fails + 1))
+  chk "storage above 300 MB"       test "$(free_mb)" -gt 300 || fails=$((fails + 1))
+  if [ -d /data/data/com.termux/files/usr ]; then
+    chk "Termux colours applied"   test -f "$HOME/.termux/colors.properties" || fails=$((fails + 1))
+  fi
+  printf '\n'
+  if [ "$fails" -eq 0 ]; then
+    ok "everything looks good"
+  else
+    warn "$fails check(s) failed. Re-run the installer: bash install.sh"
+    return 1
+  fi
+}
+
+# ---------- name -------------------------------------------
+name_cmd() {
+  local new="$1"
+  if [ -z "$new" ]; then
+    if [ ! -t 0 ]; then err "usage: dws name <NAME>"; return 1; fi
+    printf ' %sNew name%s (1-10 letters, numbers, hyphen): ' "$SKY" "$RESET"
+    read -r new || new=""
+  fi
+  if ! valid_name "$new"; then err "invalid name (1-10 letters, numbers or hyphen)"; return 1; fi
+  mkdir -p "$DWS_HOME" || { err "cannot create $DWS_HOME"; return 1; }
+  printf '%s\n' "$new" > "$NAME_FILE" || { err "cannot save name"; return 1; }
+  ok "banner name → ${BOLD}${new}${RESET} (new shells show it)"
+}
+
+# ---------- notes and todos --------------------------------
+note_cmd() {
+  if [ $# -eq 0 ]; then
+    if [ ! -s "$NOTE_FILE" ]; then warn "no notes yet. Add one: dws note <text>"; return 0; fi
+    section_title "notes"
+    cat -n "$NOTE_FILE" | sed "s/^/   /"
+    printf '\n'
+    return 0
+  fi
+  if [ "$1" = "clear" ]; then
+    : > "$NOTE_FILE" 2>/dev/null
+    ok "notes cleared"
+    return 0
+  fi
+  mkdir -p "$DWS_HOME" || return 1
+  printf '%s  %s\n' "$(date '+%Y-%m-%d %H:%M')" "$*" >> "$NOTE_FILE" || { err "cannot save note"; return 1; }
+  ok "note saved"
+}
+
+todo_cmd() {
+  local sub="${1:-list}" n total
+  mkdir -p "$DWS_HOME" 2>/dev/null
+  touch "$TODO_FILE" 2>/dev/null || { err "cannot use $TODO_FILE"; return 1; }
+  case "$sub" in
+    list|"")
+      section_title "todo"
+      if [ ! -s "$TODO_FILE" ]; then info "nothing to do. Add one: dws todo add <text>"; return 0; fi
+      cat -n "$TODO_FILE" | sed 's/^ *\([0-9]*\)\t/   \1  /' | while IFS= read -r line; do
+        if [[ "$line" == *"[x]"* ]]; then printf '%s%s%s\n' "$GREY" "$line" "$RESET"
+        else printf '%s\n' "$line"; fi
+      done
+      printf '\n'
+      ;;
+    add)
+      shift
+      if [ $# -eq 0 ]; then err "usage: dws todo add <text>"; return 1; fi
+      printf '[ ] %s\n' "$*" >> "$TODO_FILE"
+      ok "added: $*"
+      ;;
+    done)
+      n="${2:-}"; total=$(wc -l < "$TODO_FILE")
+      if ! [[ "$n" =~ ^[0-9]+$ ]] || [ "$n" -lt 1 ] || [ "$n" -gt "$total" ]; then err "usage: dws todo done <number>"; return 1; fi
+      sed -i "${n}s/^\[ \]/[x]/" "$TODO_FILE"
+      ok "marked #$n as done"
+      ;;
+    rm)
+      n="${2:-}"; total=$(wc -l < "$TODO_FILE")
+      if ! [[ "$n" =~ ^[0-9]+$ ]] || [ "$n" -lt 1 ] || [ "$n" -gt "$total" ]; then err "usage: dws todo rm <number>"; return 1; fi
+      sed -i "${n}d" "$TODO_FILE"
+      ok "removed #$n"
+      ;;
+    clear)
+      sed -i '/^\[x\]/d' "$TODO_FILE"
+      ok "finished items cleared"
+      ;;
+    *) err "usage: dws todo [list|add <text>|done <n>|rm <n>|clear]"; return 1 ;;
+  esac
+}
+
+# ---------- tools -------------------------------------------
+calc_cmd() {
+  local expr="$*"
+  if [ -z "$expr" ]; then err "usage: dws calc <expression>   e.g. dws calc (12+8)*3/2"; return 1; fi
+  if ! [[ "$expr" =~ ^[0-9+*/().%^\ -]+$ ]]; then
+    err "only numbers and + - * / % ^ ( ) . are allowed"
+    return 1
+  fi
+  local out
+  out=$(awk "BEGIN { printf \"%.10g\", ($expr) }" 2>/dev/null) || { err "could not calculate"; return 1; }
+  printf ' %s=%s %s%s\n' "$GREY" "$RESET" "${BOLD}${MINT}" "$out${RESET}"
+}
+
+pass_cmd() {
+  local len="${1:-16}"
+  if ! [[ "$len" =~ ^[0-9]+$ ]] || [ "$len" -lt 8 ] || [ "$len" -gt 128 ]; then
+    err "length must be 8-128 (default 16)"
+    return 1
+  fi
+  LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^&*()_+=-' < /dev/urandom | head -c "$len"
+  printf '\n'
+}
+
+hash_cmd() {
+  local f="$1"
+  if [ -z "$f" ] || [ ! -f "$f" ]; then err "usage: dws hash <file>"; return 1; fi
+  if ! command -v sha256sum >/dev/null 2>&1; then err "sha256sum not found"; return 1; fi
+  printf ' %sSHA-256%s  %s\n' "$MINT" "$RESET" "$(sha256sum -- "$f" | awk '{print $1}')"
+  printf ' %sfile%s     %s\n' "$GREY" "$RESET" "$f"
+}
+
+search_cmd() {
+  local pat="$1" dir="${2:-.}"
+  if [ -z "$pat" ]; then err "usage: dws search <text> [folder]"; return 1; fi
+  section_title "search: $pat"
+  grep -rIn --color=always -- "$pat" "$dir" 2>/dev/null | head -n 100
+  printf '\n'
+}
+
+size_cmd() {
+  local dir="${1:-.}" kb name max=0 rows=0 bar w
+  local -a sizes=() names=()
+  if [ ! -d "$dir" ]; then err "not a folder: $dir"; return 1; fi
+  while IFS=$'\t' read -r kb name; do
+    [ -z "$name" ] && continue
+    sizes+=("$kb"); names+=("$name")
+    if [ "$kb" -gt "$max" ]; then max=$kb; fi
+    rows=$(( rows + 1 ))
+  done < <(du -sk -- "$dir"/* "$dir"/.[!.]* 2>/dev/null | sort -rn | head -n 12)
+  section_title "size: $dir"
+  if [ "$rows" -eq 0 ]; then info "empty"; printf '\n'; return 0; fi
+  local i
+  for ((i = 0; i < rows; i++)); do
+    if [ "$max" -gt 0 ]; then w=$(( sizes[i] * 24 / max )); else w=0; fi
+    bar=$(rep '█' "$w")
+    printf '   %s%-9s%s %s%-24s%s %s\n' "$GOLD" "$(human_size $(( sizes[i] * 1024 )))" "$RESET" \
+      "$SKY" "$bar" "$RESET" "${names[i]##*/}"
+  done
+  printf '\n'
+}
+
+clock_cmd() {
+  local live=0 width fmt
+  [ "${1:-}" = "-w" ] && live=1
+  width=$(tput cols 2>/dev/null); case "$width" in ''|*[!0-9]*) width=60 ;; esac
+  fmt="%H:%M:%S"
+  if [ "$width" -lt 56 ]; then fmt="%H:%M"; fi
+  local t lines_i
+  if [ "$live" -eq 0 ]; then
+    build_logo "$(date +"$fmt")" 8
+    printf '\n'
+    for lines_i in 0 1 2; do printf '   %s%s%s\n' "$M3" "${LOGO_LINES[$lines_i]}" "$RESET"; done
+    printf '\n'
+    return 0
+  fi
+  printf '\033[?25l'
+  trap 'printf "%s[0m%s[?25h\n" "$ESC" "$ESC"; exit 0' INT TERM
+  while true; do
+    t=$(date +"$fmt")
+    build_logo "$t" 8
+    printf '\033[H\033[2J\n'
+    for lines_i in 0 1 2; do printf '   %s%s%s\n' "$M3" "${LOGO_LINES[$lines_i]}" "$RESET"; done
+    printf '\n   %s(Ctrl+C to stop)%s\n' "$GREY" "$RESET"
+    sleep 1
+  done
+}
+
+weather_cmd() {
+  if ! command -v curl >/dev/null 2>&1; then err "curl is required. Run: pkg install curl"; return 1; fi
+  info "fetching weather (network)…"
+  curl -s --max-time 10 "https://wttr.in/?format=%C+%t+%w" || { err "could not reach the weather service"; return 1; }
+  printf '\n'
+}
+
+speedtest_cmd() {
+  if ! command -v curl >/dev/null 2>&1; then err "curl is required. Run: pkg install curl"; return 1; fi
+  info "downloading a 10 MB test file (network)…"
+  local bps
+  bps=$(curl -o /dev/null -s --max-time 60 -w '%{speed_download}' http://speedtest.tele2.net/10MB.zip)
+  case "$bps" in
+    ''|0|0.000) err "speed test failed"; return 1 ;;
+  esac
+  printf ' %sDownload%s %s%.2f MB/s%s\n' "$GREY" "$RESET" "$MINT" \
+    "$(awk -v b="$bps" 'BEGIN{print b/1048576}')" "$RESET"
+}
+
+# ---------- uninstall ---------------------------------------
+uninstall_cmd() {
+  warn "This removes DWS, its shell hooks and its files."
+  printf '   Type %sYES%s to continue: ' "$RED" "$RESET"
+  local ans=""
+  read -r ans || ans=""
+  if [ "$ans" != "YES" ]; then info "cancelled"; return 0; fi
+
+  local f
+  for f in "$HOME/.zshrc" "$HOME/.bashrc"; do
+    if [ -f "$f" ]; then
+      awk -v b="# >>> DWS >>>" -v e="# <<< DWS <<<" \
+        '$0==b {skip=1; next} $0==e {skip=0; next} !skip' "$f" > "$f.dws-tmp" \
+        && mv "$f.dws-tmp" "$f"
+      if [ ! -s "$f" ]; then rm -f "$f"; fi
+    fi
+  done
+
+  if [ -d /data/data/com.termux/files/usr ]; then
+    if [ -f "$DWS_HOME/backup/colors.properties" ]; then
+      cp "$DWS_HOME/backup/colors.properties" "$HOME/.termux/colors.properties"
+    elif [ -f "$DWS_HOME/backup/colors.none" ]; then
+      rm -f "$HOME/.termux/colors.properties"
+    fi
+    if command -v termux-reload-settings >/dev/null 2>&1; then termux-reload-settings >/dev/null 2>&1 || true; fi
+  fi
+
+  # restore Termux's original welcome message
+  if [ -f "$DWS_HOME/backup/motd.orig" ] && [ -d "${PREFIX:-/data/data/com.termux/files/usr}/etc" ]; then
+    cp "$DWS_HOME/backup/motd.orig" "${PREFIX:-/data/data/com.termux/files/usr}/etc/motd" 2>/dev/null || true
+  fi
+
+  # keep the user's original .zshrc, saved before DWS first touched it
+  if [ -f "$DWS_HOME/backup/zshrc.orig" ] && [ ! -f "$HOME/.zshrc.dws-backup" ]; then
+    cp "$DWS_HOME/backup/zshrc.orig" "$HOME/.zshrc.dws-backup"
+  fi
+
+  if [ -n "$DWS_HOME" ] && [ "$DWS_HOME" != "/" ] && [ "$DWS_HOME" != "$HOME" ]; then
+    rm -rf "$DWS_HOME"
+  fi
+  ok "DWS removed"
+  if [ -f "$HOME/.zshrc.dws-backup" ]; then info "your original .zshrc is kept at ~/.zshrc.dws-backup"; fi
+  info "restart Termux to finish"
+}
+
+
+# ---------- advanced tools ----------------------------------
+tree_walk() { # tree_walk <dir> <prefix> <level> <max-depth>
+  local dir="$1" prefix="$2" level="$3" max="$4" f n i=0 last
+  local -a items=()
+  shopt -s nullglob
+  for f in "$dir"/*; do items+=("$f"); done
+  shopt -u nullglob
+  n=${#items[@]}
+  for f in "${items[@]}"; do
+    i=$(( i + 1 ))
+    local name="${f##*/}" connector="├── " next="│   "
+    if [ "$i" -eq "$n" ]; then connector="└── "; next="    "; fi
+    classify "$f" "$name"
+    printf ' %s%s%s%s %s%s%s\n' "$GREY" "$prefix$connector" "$RESET" "$ICON" \
+      "${ESC}[${CCODE}m" "$name" "$RESET"
+    if [ -d "$f" ] && [ ! -L "$f" ] && [ "$level" -lt "$max" ]; then
+      tree_walk "$f" "$prefix$next" $(( level + 1 )) "$max"
+    fi
+  done
+}
+
+tree_cmd() {
+  local dir="${1:-.}" depth="${2:-2}"
+  if ! [[ "$depth" =~ ^[0-9]+$ ]]; then err "usage: dws tree [folder] [depth]"; return 1; fi
+  if [ ! -d "$dir" ]; then err "not a folder: $dir"; return 1; fi
+  section_title "tree"
+  printf ' %s%s%s\n' "$PINK" "$dir" "$RESET"
+  tree_walk "$dir" "" 1 "$depth"
+  printf '\n'
+}
+
+ip_cmd() {
+  if ! command -v ip >/dev/null 2>&1; then
+    warn "the 'ip' tool is missing. Install it: pkg install iproute2  (Linux: apt install iproute2)"
+    return 1
+  fi
+  section_title "network"
+  local line iface addr any=0
+  while read -r _ iface _ addr _; do
+    [ "$iface" = "lo" ] && continue
+    info_row "$MINT" "$iface" "$addr"
+    any=1
+  done < <(ip -4 -o addr show 2>/dev/null)
+  if [ "$any" -eq 0 ]; then warn "no active IPv4 address (are you on Wi-Fi or mobile data?)"; fi
+  printf '\n'
+}
+
+battery_cmd() {
+  if ! command -v termux-battery-status >/dev/null 2>&1; then
+    warn "battery info needs Termux:API. Install: pkg install termux-api (and the Termux:API app)"
+    return 1
+  fi
+  local json pct status temp
+  json=$(termux-battery-status 2>/dev/null)
+  pct=$(printf '%s' "$json" | grep -o '"percentage": *[0-9]*' | grep -o '[0-9]*$')
+  status=$(printf '%s' "$json" | grep -o '"status": *"[A-Z_]*"' | sed 's/.*"\([A-Z_]*\)"$/\1/')
+  temp=$(printf '%s' "$json" | grep -o '"temperature": *[0-9.]*' | grep -o '[0-9.]*$')
+  section_title "battery"
+  info_row "$MINT"   "Level"  "${pct:-?}%"
+  info_row "$SKY"    "Status" "${status:-unknown}"
+  info_row "$ORANGE" "Temp"   "${temp:-?} °C"
+  printf '\n'
+}
+
+# ---------- help --------------------------------------------
+help_cmd() {
+  draw_home_banner
+  local rows=(
+    "SYSTEM|info|System details"
+    "SYSTEM|doctor|Health check of the install"
+    "SYSTEM|clock [-w]|Big clock (-w = live)"
+    "SYSTEM|name [NAME]|Change banner name"
+    "FILES|ls [-a] [-l]|Icon-coloured listing"
+    "FILES|search <text>|Search text in files"
+    "FILES|hash <file>|SHA-256 checksum"
+    "FILES|size [folder]|Biggest items with bars"
+    "FILES|tree [folder] [depth]|Folder tree with icons"
+    "TOOLS|note [text]|Quick notes (note clear)"
+    "TOOLS|todo [add/done/rm]|Simple todo list"
+    "TOOLS|calc <expr>|Calculator"
+    "TOOLS|pass [len]|Random password"
+    "NET|weather|Weather (needs internet)"
+    "NET|speedtest|Download speed (needs internet)"
+    "NET|ip|Local IP address"
+    "SYSTEM|battery|Battery (needs Termux:API)"
+    "SETUP|uninstall|Remove DWS"
+  )
+  local row group cmd desc rest last=""
+  for row in "${rows[@]}"; do
+    group="${row%%|*}"; rest="${row#*|}"; cmd="${rest%%|*}"; desc="${rest#*|}"
+    if [ "$group" != "$last" ]; then printf '\n  %s%s%s\n' "$PINK$BOLD" "$group" "$RESET"; last="$group"; fi
+    printf '   %s%-20s%s %s\n' "$MINT" "$cmd" "$RESET" "$desc"
+  done
+  printf '\n'
+}
+
+# ---------- dispatch ----------------------------------------
+main() {
+  local cmd="${1:-}"
+  if [ $# -gt 0 ]; then shift; fi
+  case "$cmd" in
+    ""|dash|dashboard)    draw_home_banner ;;
+    help|-h|--help)       help_cmd ;;
+    version|-v|--version) printf 'DWS PREMIUM V%s\n' "$DWS_VERSION" ;;
+    info)                 info_cmd ;;
+    doctor)               doctor_cmd ;;
+    name)                 name_cmd "${1:-}" ;;
+    ls)                   dws_ls "$@" ;;
+    note)                 note_cmd "$@" ;;
+    todo)                 todo_cmd "$@" ;;
+    calc)                 calc_cmd "$@" ;;
+    pass)                 pass_cmd "${1:-}" ;;
+    hash)                 hash_cmd "${1:-}" ;;
+    search)               search_cmd "${1:-}" "${2:-}" ;;
+    size)                 size_cmd "${1:-.}" ;;
+    tree)                 tree_cmd "${1:-.}" "${2:-2}" ;;
+    ip)                   ip_cmd ;;
+    battery)              battery_cmd ;;
+    clock)                clock_cmd "$@" ;;
+    weather)              weather_cmd ;;
+    speedtest)            speedtest_cmd ;;
+    uninstall)            uninstall_cmd ;;
+    *)                    err "unknown command: $cmd"; info "try: dws help"; return 1 ;;
+  esac
+}
+
+main "$@"
+exit $?

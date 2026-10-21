@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint and validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+
+      - name: Shellcheck (errors only)
+        run: shellcheck -S error install.sh bin/dws tests/smoke.sh
+
+      - name: Validate SVG banners
+        run: |
+          python3 - <<'PY'
+          import glob, xml.dom.minidom as m
+          files = glob.glob('assets/*.svg')
+          for f in files:
+              m.parse(f)
+              print('valid:', f)
+          assert files, 'no banners found'
+          PY
+
+  smoke:
+    name: Install and run (Ubuntu)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Smoke test
+        run: bash tests/smoke.sh

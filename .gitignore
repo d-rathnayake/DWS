@@ -1,0 +1,7 @@
+# runtime files created by DWS (never commit these)
+install.log
+*.dws-tmp
+*.log
+.zcompdump*
+.DS_Store
+*.swp

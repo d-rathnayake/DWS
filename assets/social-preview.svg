@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="DWS PREMIUM V1 social preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#05070F"/>
+      <stop offset="55%" stop-color="#0B1430"/>
+      <stop offset="100%" stop-color="#12082A"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#39C5FF"/>
+      <stop offset="50%" stop-color="#8B7BFF"/>
+      <stop offset="100%" stop-color="#FF6EC7"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#58A6FF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#58A6FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0 L0 0 0 40" fill="none" stroke="#ffffff" stroke-opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <circle cx="1000" cy="320" r="330" fill="url(#halo)"/>
+
+  <text x="80" y="290" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="170" font-weight="800" fill="url(#title)" filter="url(#glow)">DWS</text>
+  <text x="86" y="356" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="44" font-weight="700" fill="#E6EDFF">PREMIUM V1</text>
+  <text x="86" y="400" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="24" fill="#9FB3D9">A neon terminal toolkit for Termux and Linux</text>
+
+  <rect x="86" y="444" width="168" height="44" rx="22" fill="#58A6FF" fill-opacity="0.15" stroke="#58A6FF" stroke-opacity="0.7"/>
+  <text x="170" y="473" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#9ED2FF">ICON LS</text>
+  <rect x="270" y="444" width="168" height="44" rx="22" fill="#8B7BFF" fill-opacity="0.15" stroke="#8B7BFF" stroke-opacity="0.7"/>
+  <text x="354" y="473" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#CFC6FF">OFFLINE</text>
+  <rect x="454" y="444" width="208" height="44" rx="22" fill="#FF6EC7" fill-opacity="0.15" stroke="#FF6EC7" stroke-opacity="0.7"/>
+  <text x="558" y="473" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#FFC2E6">ZERO TELEMETRY</text>
+
+  <text x="86" y="560" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="22" fill="#8FA3CC">dev · <tspan font-weight="700" fill="#FF6EC7">d-rathnayake</tspan></text>
+
+  <!-- decorative web-of-rails at the right -->
+  <g stroke="#58A6FF" stroke-opacity="0.35" fill="none" stroke-width="2">
+    <path d="M820 120 C 920 80, 1040 140, 1120 100 S 1200 180, 1230 150"/>
+    <path d="M800 220 C 900 200, 1000 250, 1100 220 S 1200 280, 1240 260"/>
+    <path d="M820 340 C 920 320, 1000 380, 1120 350 S 1200 400, 1240 380"/>
+    <path d="M820 470 C 900 450, 1010 500, 1120 470 S 1200 520, 1240 500"/>
+  </g>
+  <g fill="#FF6EC7">
+    <circle cx="1120" cy="100" r="6"/>
+    <circle cx="1100" cy="220" r="6"/>
+    <circle cx="1120" cy="350" r="6"/>
+    <circle cx="1120" cy="470" r="6"/>
+  </g>
+</svg>
